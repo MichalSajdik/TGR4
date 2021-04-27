@@ -32,6 +32,7 @@ rl.on('line', function (line) {
 })
 
 let permArr = [], usedChars = [];
+
 function getCombinationsOfParkingPlaces(parkingPlaces) {
     var i, ch;
     for (i = 0; i < parkingPlaces.length; i++) {
@@ -47,18 +48,66 @@ function getCombinationsOfParkingPlaces(parkingPlaces) {
     return permArr
 }
 
+
+// gonna take permutations of indexes from here, and use it to mix
+// string_nth_permutation from https://www.javaer101.com/en/article/2074170.html
+function string_nth_permutation(str, n) {
+    var len = str.length, i, f, res;
+
+    for (f = i = 1; i <= len; i++)
+        f *= i;
+
+    if (n >= 0 && n < f) {
+        for (res = ""; len > 0; len--) {
+            f /= len;
+            i = Math.floor(n / f);
+            n %= f;
+            res += str.charAt(i);
+            str = str.substring(0, i) + str.substring(i + 1);
+        }
+    }
+    return res;
+}
+
+// factorial function from https://www.freecodecamp.org/news/how-to-factorialize-a-number-in-javascript-9263c89a4b38/
+function factorial(num) {
+    if (num === 0 || num === 1)
+        return 1;
+    for (var i = num - 1; i >= 1; i--) {
+        num *= i;
+    }
+    return num;
+}
+
+function getKeysForPermutation() {
+    let sResult = "";
+    for (let i = 0; i < parkingPlaces.length; i++) {
+        sResult = sResult.concat(String.fromCharCode(i));
+    }
+    return sResult;
+}
+
+// maximum of parking places is 170
 rl.on('close', (input) => {
 
-    let combParkingPlaces = getCombinationsOfParkingPlaces(parkingPlaces);
+    let keyStringForPermutations = getKeysForPermutation();
+    // console.log(keyStringForPermutations);
+
+    let numberOfPermutations = factorial(cars.length);
+
+    // let combParkingPlaces = getCombinationsOfParkingPlaces(parkingPlaces);
     // console.log("asd");
     // console.log(combParkingPlaces);
     // console.log("asd");
     let minDistance = Number.MAX_VALUE;
-    let minimalCombParkingPlace = 0;
-    for (let i = 0; i < combParkingPlaces.length; i++) {
+    let finalKey = "";
+    for (let i = 0; i < numberOfPermutations; i++) {
         let localDistance = 0;
-        for (let j = 0; j < combParkingPlaces[i].length; j++) {
-            let distance = Math.abs(cars[j].avenue - combParkingPlaces[i][j].avenue) + Math.abs(cars[j].street - combParkingPlaces[i][j].street);
+
+        let key = string_nth_permutation(keyStringForPermutations, i);
+
+        for (let j = 0; j < cars.length; j++) {
+            let distance = Math.abs(cars[j].avenue - parkingPlaces[key.charCodeAt(j)].avenue) + Math.abs(cars[j].street - parkingPlaces[key.charCodeAt(j)].street);
             // process.stdout.write(cars[j].element);
             // process.stdout.write(" -> ");
             // process.stdout.write(combParkingPlaces[i][j].element);
@@ -69,7 +118,7 @@ rl.on('close', (input) => {
         }
         if (localDistance < minDistance) {
             minDistance = localDistance;
-            minimalCombParkingPlace = i;
+            finalKey = key;
         }
     }
 
@@ -79,10 +128,10 @@ rl.on('close', (input) => {
 
     let totalDistance = 0;
     for (let j = 0; j < cars.length; j++) {
-        let distance = Math.abs(cars[j].avenue - combParkingPlaces[minimalCombParkingPlace][j].avenue) + Math.abs(cars[j].street - combParkingPlaces[minimalCombParkingPlace][j].street);
+        let distance = Math.abs(cars[j].avenue - parkingPlaces[finalKey.charCodeAt(j)].avenue) + Math.abs(cars[j].street - parkingPlaces[finalKey.charCodeAt(j)].street);
         process.stdout.write(cars[j].element);
         process.stdout.write(" -> ");
-        process.stdout.write(combParkingPlaces[minimalCombParkingPlace][j].element);
+        process.stdout.write(parkingPlaces[finalKey.charCodeAt(j)].element);
         process.stdout.write(": ");
         process.stdout.write(distance.toString());
         console.log();
