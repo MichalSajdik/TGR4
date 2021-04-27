@@ -1,0 +1,23 @@
+4a >> nejaky algoritmus >> Ford-Fulkerson algorithm, treba transformovat : https://www.quora.com/Can-we-apply-Ford-Fulkerson-to-a-multiple-sources-and-multiple-sinks-graph
+	>>  z algoritmu dostaneme maximum flow
+	>> nejako budem musiel upravit algoritmus aby som ziskat aj za aky cas to cele prejde
+		>> round(capacity/maxFlow) + (biggestFlow.length-2)
+4b >> vzat osobu a postupne k tej osobe pridavat, ak nejde pridat, tak to je skupina
+	>> pokracovat dokial nevytvorime vsetky skupiny
+	
+michal, pepa, tomas, 
+jirka, 
+anna, honza, lucka 
+
+>> pokud by mal byt sam, tak sa pozrie do uz vytvorenych skupin a zoberie si niekoho koho nepozna
+
+michal, tomas, 
+jirka, pepa
+anna, honza, lucka
+
+4c >> brute force >> udelat vypocet na vsechny mozne moznosti (celkova vzdalenost ) 
+			>> moznost s nejmensi vzdalenosti se vybere
+			>> vypocet vzdalenosti abs(street) - abs(street2) + abs(avenue) - abs(avenue2)
+		>> vytvorit parkovacie miesta a auta
+		>> potom zamiesat iba jedno z nich (vsetky mozne kombinacie podla poradia) >> tak dosiahneme vsetkych kombinacii
+	
