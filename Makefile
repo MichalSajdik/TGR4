@@ -9,9 +9,16 @@ build:
 	echo '#!/bin/bash' > teams
 	echo 'node' 'teamsCompile' >> teams
 	chmod +x teams
+	cp src/evacuation.js evacuationCompile
+	touch  evacuation
+	echo '#!/bin/bash' > evacuation
+	echo 'node' 'evacuationCompile' >> evacuation
+	chmod +x evacuation
 
 clean:
 	rm -rf parking
 	rm -rf parkingCompile
 	rm -rf teams
 	rm -rf teamsCompile
+	rm -rf evacuation
+	rm -rf evacuationCompile

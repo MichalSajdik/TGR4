@@ -108,12 +108,6 @@ rl.on('close', (input) => {
 
         for (let j = 0; j < cars.length; j++) {
             let distance = Math.abs(cars[j].avenue - parkingPlaces[key.charCodeAt(j)].avenue) + Math.abs(cars[j].street - parkingPlaces[key.charCodeAt(j)].street);
-            // process.stdout.write(cars[j].element);
-            // process.stdout.write(" -> ");
-            // process.stdout.write(combParkingPlaces[i][j].element);
-            // process.stdout.write(": ");
-            // process.stdout.write(distance.toString());
-            // console.log();
             localDistance += distance;
         }
         if (localDistance < minDistance) {
@@ -121,7 +115,6 @@ rl.on('close', (input) => {
             finalKey = key;
         }
     }
-
     // console.log(cars);
     // console.log(parkingPlaces);
     // console.log(originalLinks);

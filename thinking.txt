@@ -2,6 +2,15 @@
 	>>  z algoritmu dostaneme maximum flow
 	>> nejako budem musiel upravit algoritmus aby som ziskat aj za aky cas to cele prejde
 		>> round(capacity/maxFlow) + (biggestFlow.length-2)
+Ford-Fulkerson:
+	>> vytvorit maticu vsetkych miestnosti (vcetne exitu)
+		>> hodnoty budu kapacity prietoku
+	
+	>> zo stlpcou 1 a 2 sa zistia vsetky mozne miestnosti pre tvorbu matrixu
+	>> vytvorit matrix ako uz je niekde inde, len hodnoty v matrixi budu zmenene (nahradi sa "1")
+	>> aplikacia algoritmu
+
+
 4b >> vzat osobu a postupne k tej osobe pridavat, ak nejde pridat, tak to je skupina >> Bipartitní grafy Párování ? prednaska 8
 	>> pokracovat dokial nevytvorime vsetky skupiny
 	
