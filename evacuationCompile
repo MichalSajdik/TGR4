@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 let debugPass = false;
 
-var readline = require('readline');
-var rl = readline.createInterface({
+let readline = require('readline');
+let rl = readline.createInterface({
     input: process.stdin,
 });
 
@@ -67,43 +67,109 @@ rl.on('line', function (line) {
 
 })
 
-rl.on('close', (input) => {
 
-    console.log(firstRoom);
-    console.log(routes);
+function getIndex(place) {
+    for (let i = 0; i < rooms.length; i++) {
+        if (rooms[i] === place) {
+            return i;
+        }
+    }
+}
+
+function getLengthOfLongestPath() {
+    let stack = [];
+    let index = 0;
+    for (let i = 0; i < graphWithActualFlow[index].length; i++) {
+        if (graphWithActualFlow[index][i]) {
+            stack.push(i + "");
+        }
+    }
+    index = stack.pop();
+
+    let possiblePaths = [];
+    let maxLength = 0;
+    while (index) {
+        let j = parseInt(index[index.length-1]);
+        let b = false;
+
+        for (let i = 0; i < graphWithActualFlow[j].length; i++) {
+
+            if (graphWithActualFlow[j][i]) {
+                b = true;
+                stack.push(index.concat(i));
+            }
+        }
+
+        if(!b){
+            possiblePaths.push(index);
+        }
+        index = stack.pop();
+    }
+
+    possiblePaths = possiblePaths.sort(function(a,b){
+        return  b.length - a.length ;
+    })
+
+    return possiblePaths[0].length;
+}
+
+rl.on('close', function (input) {
+    // console.log(firstRoom);
+    // console.log(routes);
     createMatrix();
+    // console.log(rooms);
+    let groupSize = fordFulkerson(cleanMatrix, 0, rooms.length - 1);
+    console.log("Group size: " + groupSize);
+    // console.log(graphWithActualFlow);
 
-    console.log(fordFulkerson(cleanMatrix, 0, rooms.length -1))
 
-    console.log(graphWithActualFlow)
+    for (let i = 0; i < routes.length; i++) {
+        let route = routes[i];
+        let index1 = getIndex(route[1]);
+        let index2 = getIndex(route[2]);
+        let optimalFlow = graphWithActualFlow[index1][index2];
+        process.stdout.write(route[0]);
+        process.stdout.write(": ");
+        if (optimalFlow === parseInt(route[3])) {
+            process.stdout.write("!");
+        }
+        process.stdout.write(optimalFlow.toString());
+        if (optimalFlow === parseInt(route[3])) {
+            process.stdout.write("!");
+        }
+        console.log();
+    }
 
+    let lengthOfLongestPath = getLengthOfLongestPath();
+    console.log("Time: " + ((parseInt(firstRoom[1]) / groupSize) + lengthOfLongestPath - 1));
 });
 
 
 let matrix = {};
 let cleanMatrix = [];
 let rooms = [];
+
 function createMatrix() {
 
     let allRooms = [firstRoom[0]];
-    routes.forEach(function(route){
+    routes.forEach(function (route) {
         allRooms.push(route[1]);
         allRooms.push(route[2]);
     })
     // console.log(allRooms);
 
 
-    allRooms = allRooms.filter(function(room){
+    allRooms = allRooms.filter(function (room) {
         return room !== 'EXIT';
     })
     // console.log(allRooms);
 
     allRooms.push('EXIT');
 
-    rooms = allRooms.reduce(function(a,b){
-        if (a.indexOf(b) < 0 ) a.push(b);
+    rooms = allRooms.reduce(function (a, b) {
+        if (a.indexOf(b) < 0) a.push(b);
         return a;
-    },[]);
+    }, []);
 
     // console.log(rooms);
 
@@ -127,10 +193,10 @@ function createMatrix() {
 
 }
 
-function getCapacityForEdge(room, room2){
+function getCapacityForEdge(room, room2) {
     let capacity = 0;
-    routes.forEach(function(route){
-        if(route[1] === room && route[2] === room2){
+    routes.forEach(function (route) {
+        if (route[1] === room && route[2] === room2) {
             capacity = route[3];
         }
     })
@@ -138,77 +204,60 @@ function getCapacityForEdge(room, room2){
 }
 
 
-
-
-function bfs(rGraph, s, t, parent) {
-    var visited = [];
-    var queue = [];
-    var V = rGraph.length;
+// inspired from https://github.com/prabod/Graph-Theory-Ford-Fulkerson-Maximum-Flow/blob/master/index.js
+function bfs(rGraph, sourcePlace, destinationPlace, parent) {
+    let visited = [];
+    let queue = [];
     // Create a visited array and mark all vertices as not visited
-    for (var i = 0; i < V; i++) {
+    for (let i = 0; i < rGraph.length; i++) {
         visited[i] = false;
     }
     // Create a queue, enqueue source vertex and mark source vertex as visited
-    queue.push(s);
-    visited[s] = true;
-    parent[s] = -1;
+    queue.push(sourcePlace);
+    visited[sourcePlace] = true;
+    parent[sourcePlace] = -1;
 
     while (queue.length != 0) {
-        var u = queue.shift();
-        for (var v = 0; v < V; v++) {
-            if (visited[v] == false && rGraph[u][v] > 0) {
-                queue.push(v);
-                parent[v] = u;
-                visited[v] = true;
+        let p = queue.shift();
+        for (let i = 0; i < rGraph.length; i++) {
+            if (visited[i] == false && rGraph[p][i] > 0) {
+                queue.push(i);
+                parent[i] = p;
+                visited[i] = true;
             }
         }
     }
-    //If we reached sink in BFS starting from source, then return true, else false
-    return (visited[t] == true);
+    return visited[destinationPlace] == true;
 }
 
 let graphWithActualFlow = [];
-function fordFulkerson(graph, s, t) {
-    /* Create a residual graph and fill the residual graph
-     with given capacities in the original graph as
-     residual capacities in residual graph
-     Residual graph where rGraph[i][j] indicates
-     residual capacity of edge from i to j (if there
-     is an edge. If rGraph[i][j] is 0, then there is
-     not)
-    */
-    if (s < 0 || t < 0 || s > graph.length-1 || t > graph.length-1){
-        throw new Error("Ford-Fulkerson-Maximum-Flow :: invalid sink or source");
-    }
-    if(graph.length === 0){
-        throw new Error("Ford-Fulkerson-Maximum-Flow :: invalid graph");
-    }
-    var rGraph = [];
-    for (var u = 0; u < graph.length; u++) {
-        var temp = [];
-        if(graph[u].length !== graph.length){
-            throw new Error("Ford-Fulkerson-Maximum-Flow :: invalid graph. graph needs to be NxN");
+
+// inspired from https://github.com/prabod/Graph-Theory-Ford-Fulkerson-Maximum-Flow/blob/master/index.js
+function fordFulkerson(graph, sourcePlace, destinationPlace) {
+
+    let rGraph = [];
+    for (let i = 0; i < graph.length; i++) {
+        let tmp = [];
+        for (let j = 0; j < graph.length; j++) {
+            tmp.push(graph[i][j]);
         }
-        for (v = 0; v < graph.length; v++) {
-            temp.push(graph[u][v]);
-        }
-        rGraph.push(temp);
+        rGraph.push(tmp);
     }
-    var parent = [];
-    var maxFlow = 0;
+    let parent = [];
+    let maxFlow = 0;
 
     // console.log(rGraph)
 
-    while (bfs(rGraph, s, t, parent)) {
-        var pathFlow = Number.MAX_VALUE;
-        for (var v = t; v != s; v = parent[v]) {
-            u = parent[v];
-            pathFlow = Math.min(pathFlow, rGraph[u][v]);
+    while (bfs(rGraph, sourcePlace, destinationPlace, parent)) {
+        let pathFlow = Number.MAX_VALUE;
+        for (let i = destinationPlace; i != sourcePlace; i = parent[i]) {
+            let p = parent[i];
+            pathFlow = Math.min(pathFlow, rGraph[p][i]);
         }
-        for (v = t; v != s; v = parent[v]) {
-            u = parent[v];
-            rGraph[u][v] -= pathFlow;
-            rGraph[v][u] += pathFlow;
+        for (let i = destinationPlace; i != sourcePlace; i = parent[i]) {
+            let p = parent[i];
+            rGraph[p][i] -= pathFlow;
+            rGraph[i][p] += pathFlow;
         }
         maxFlow += pathFlow;
     }
@@ -217,17 +266,12 @@ function fordFulkerson(graph, s, t) {
 
 
     let graph2 = [];
-    for(let i = 0 ; i < rGraph.length ; i++){
+    for (let i = 0; i < rGraph.length; i++) {
         let f = [];
         let f2 = [];
-        for(let j = 0 ; j < rGraph[i].length ; j++){
-            // if(graph[i][j] === 0){
-            //     f.push(0);
-            // }else{
-            //     f.push(rGraph[j][i]);
-            // }
+        for (let j = 0; j < rGraph[i].length; j++) {
             let a = graph[i][j] - rGraph[i][j];
-            if(a < 0){
+            if (a < 0) {
                 a = 0;
             }
             f2.push(a);
