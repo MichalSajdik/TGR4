@@ -141,7 +141,7 @@ rl.on('close', function (input) {
     }
 
     let lengthOfLongestPath = getLengthOfLongestPath();
-    console.log("Time: " + ((parseInt(firstRoom[1]) / groupSize) + lengthOfLongestPath - 1));
+    console.log("Time: " + (Math.ceil(parseInt(firstRoom[1]) / groupSize) + lengthOfLongestPath - 1));
 });
 
 

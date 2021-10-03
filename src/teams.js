@@ -88,6 +88,9 @@ function getTeamMemberFromPreviousTeams(person) {
 
     for (let i = 0; i < teams.length; i++) {
         let team = teams[i];
+        if(team.length <= 2){
+            continue;
+        }
         for (let j = 0; j < team.length; j++) {
             if (matrix[team[j]][person] === 0) {
                 return team.splice(j, 1)[0];
